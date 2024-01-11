@@ -35,16 +35,20 @@ public class CupcakeController {
 
 
     @GetMapping
-    public ResponseEntity<Cupcake[]> getCupcakes() throws IOException {
+    public ResponseEntity<Object[]> getCupcakes(@RequestParam(required = false) String flavor) throws IOException {
         File cupcakeResource = resourceLoader.getResource("classpath:seedData.json").getFile();
         ObjectMapper mapper = new ObjectMapper();
         Cupcake[] cupcakes = mapper.readValue(cupcakeResource, Cupcake[].class);
         TextEncryptor encryptor = Encryptors.text(encryptionPass, encryptionSalt);
 
+        if (flavor != null) {
+            cupcakes = Arrays.stream(cupcakes).filter(c -> Objects.equals(c.getFlavor(), flavor)).toArray(Cupcake[]::new);
+        }
+
         for (int i = 0; i < cupcakes.length; i++) {
             String decryptedCupcake = encryptor.decrypt(cupcakes[i].getInstructions());
             cupcakes[i].setInstructions(decryptedCupcake);
-        }
+
         return new ResponseEntity<>(cupcakes, HttpStatus.OK);
     }
 
@@ -52,16 +56,16 @@ public class CupcakeController {
     public ResponseEntity<?> getCupcake(@PathVariable Long id) throws IOException {
         File cupcakeResource = resourceLoader.getResource("classpath:seedData.json").getFile();
         ObjectMapper mapper = new ObjectMapper();
-        Object[] cupcakeFilter = Arrays.stream(mapper.readValue(cupcakeResource, Cupcake[].class)).filter(c -> Objects.equals(c.getId(), id)).toArray();
+        Cupcake[] cupcake = Arrays.stream(mapper.readValue(cupcakeResource, Cupcake[].class)).filter(c -> Objects.equals(c.getId(), id)).toArray(Cupcake[]::new);
         TextEncryptor encryptor = Encryptors.text(encryptionPass, encryptionSalt);
 
-        if (cupcakeFilter.length == 0) {
+        if (cupcake.length == 0) {
             return new ResponseEntity<>("Cupcake not found", HttpStatus.NOT_FOUND);
         }
-        Cupcake cupcake = (Cupcake) cupcakeFilter[0];
-        String decryptedCupcake = encryptor.decrypt(cupcake.getInstructions());
-        cupcake.setInstructions(decryptedCupcake);
-        return new ResponseEntity<>(cupcake, HttpStatus.OK);
+        String decryptedCupcake = encryptor.decrypt(cupcake[0].getInstructions());
+        cupcake[0].setInstructions(decryptedCupcake);
+        return new ResponseEntity<>(cupcake[0], HttpStatus.OK);
+
 
     }
 
