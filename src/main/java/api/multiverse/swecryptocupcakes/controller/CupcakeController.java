@@ -35,7 +35,7 @@ public class CupcakeController {
 
 
     @GetMapping
-    public ResponseEntity<Object[]> getCupcakes(@RequestParam(required = false) String flavor) throws IOException {
+    public ResponseEntity<Cupcake[]> getCupcakes(@RequestParam(required = false) String flavor) throws IOException {
         File cupcakeResource = resourceLoader.getResource("classpath:seedData.json").getFile();
         ObjectMapper mapper = new ObjectMapper();
         Cupcake[] cupcakes = mapper.readValue(cupcakeResource, Cupcake[].class);
