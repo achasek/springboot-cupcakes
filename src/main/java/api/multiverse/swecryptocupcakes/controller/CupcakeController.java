@@ -49,10 +49,12 @@ public class CupcakeController {
             String decryptedCupcake = encryptor.decrypt(cupcakes[i].getInstructions());
             cupcakes[i].setInstructions(decryptedCupcake);
 
+        }
         return new ResponseEntity<>(cupcakes, HttpStatus.OK);
+
     }
 
-    @GetMapping("{id}")
+        @GetMapping("{id}")
     public ResponseEntity<?> getCupcake(@PathVariable Long id) throws IOException {
         File cupcakeResource = resourceLoader.getResource("classpath:seedData.json").getFile();
         ObjectMapper mapper = new ObjectMapper();
